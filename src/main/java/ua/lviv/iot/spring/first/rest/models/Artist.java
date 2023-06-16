@@ -21,7 +21,6 @@ public class Artist {
     private String name;
     private LocalDate dateOfBirth;
     private List<Integer> albumsId = new ArrayList<>();
-    //private List<Integer> labelsId = new ArrayList<>();
 
     @JsonIgnore
     public String getHeaders() {
@@ -39,10 +38,4 @@ public class Artist {
         return Collections.emptyList();
     }
 
-//    public List<Integer> getLabelsId() {
-//        if (labelsId != null) {
-//            return Collections.unmodifiableList(labelsId);
-//        }
-//        return Collections.emptyList();
-//    }
 }

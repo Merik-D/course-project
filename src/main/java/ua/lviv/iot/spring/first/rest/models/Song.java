@@ -31,20 +31,6 @@ public class Song {
         return duration.matches(regex);
     }
 
-//    public void setDuration(String duration) {
-//        String[] parts = duration.split(":");
-//        int minutes = Integer.parseInt(parts[0]);
-//        int seconds = Integer.parseInt(parts[1]);
-//
-//        this.duration = String.format("%02d:%02d", minutes, seconds);
-//    }
-//
-//    public String getDurationFormatted() {
-//        int minutes = duration / 60;
-//        int seconds = duration % 60;
-//        return String.format("%02d:%02d", minutes, seconds);
-//    }
-
     @JsonIgnore
     public String getHeaders() {
         return "id, title, duration, releaseYear, lyrics";
