@@ -1,0 +1,2 @@
+id, title, dateOfEstablishment, artistsId
+1, NewTitle1, 2023-06-10, [3, 4]

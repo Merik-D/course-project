@@ -137,7 +137,7 @@ public class ArtistWriter implements TemplateFileWriter<Artist, Integer> {
     }
 
     private static Artist extractFromCSV(final String lineFromCSV) throws NumberFormatException {
-        String[] fields = lineFromCSV.split(",", -1);
+        String[] fields = lineFromCSV.split(",", 4);
         Integer id = Integer.parseInt(fields[0].trim());
         String name = fields[1].trim();
         LocalDate dateOfBirth = LocalDate.parse(fields[2].trim());

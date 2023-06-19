@@ -136,7 +136,7 @@ public class MusicLabelWriter implements TemplateFileWriter<MusicLabel, Integer>
     }
 
     private static MusicLabel extractFromCSV(final String lineFromCSV) throws NumberFormatException {
-        String[] fields = lineFromCSV.split(",", 5);
+        String[] fields = lineFromCSV.split(",", 4);
         Integer id = Integer.parseInt(fields[0].trim());
         String title = fields[1].trim();
         LocalDate dateOfEstablishment = LocalDate.parse(fields[2].trim());
