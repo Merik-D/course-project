@@ -3,12 +3,14 @@ package ua.lviv.iot.spring.first.rest.service.impl;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import ua.lviv.iot.spring.first.rest.managers.FileManager;
 import ua.lviv.iot.spring.first.rest.models.Artist;
 import ua.lviv.iot.spring.first.rest.models.MusicLabel;
 import ua.lviv.iot.spring.first.rest.service.ArtistService;
 import ua.lviv.iot.spring.first.rest.service.MusicLabelService;
 import ua.lviv.iot.spring.first.rest.writer.MusicLabelWriter;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,26 +20,28 @@ import java.util.Map;
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class MusicLabelServiceImpl implements MusicLabelService {
+    private final MusicLabel entityInstance = new MusicLabel();
     private final Map<Integer, MusicLabel> musicLabels;
-    private int nextAvailableId = 1;
+    private final FileManager manager = new FileManager();
+    private Integer nextAvailableId;
     private final MusicLabelWriter musicLabelWriter;
     private final ArtistService artistService;
 
     public MusicLabelServiceImpl(final MusicLabelWriter musicLabelWriter, final ArtistService artistService) throws IOException {
         this.musicLabelWriter = musicLabelWriter;
-        this.musicLabels = musicLabelWriter.read();
+        this.musicLabels = musicLabelWriter.read(new File(manager.getMonthDirectoryPath(entityInstance)));
         this.artistService = artistService;
-        int maxId = musicLabels.keySet().stream()
+        this.nextAvailableId = musicLabels.keySet().stream()
                 .max(Integer::compareTo)
-                .orElse(0);
-        this.nextAvailableId = maxId + 1;
+                .orElse(0) + 1;
     }
 
     @Override
     public MusicLabel create(final MusicLabel musicLabel) throws IOException {
+        String fileName = manager.getFilePath(musicLabel);
         musicLabel.setId(nextAvailableId++);
         musicLabels.put(musicLabel.getId(), musicLabel);
-        musicLabelWriter.save(musicLabel);
+        musicLabelWriter.save(musicLabel, fileName);
         return musicLabel;
     }
 
@@ -50,14 +54,20 @@ public class MusicLabelServiceImpl implements MusicLabelService {
     }
 
     public MusicLabel delete(final Integer id) throws IOException {
-        musicLabelWriter.delete(id);
+        File[] files = manager.getFileFromCurrentMonth(entityInstance);
+        if (files != null) {
+            musicLabelWriter.delete(id, files);
+        }
         return musicLabels.remove(id);
     }
 
     public MusicLabel update(final Integer id, final MusicLabel updatedMusicLabel) throws IOException {
-        updatedMusicLabel.setId(id);
-        musicLabels.put(id, updatedMusicLabel);
-        musicLabelWriter.update(id, updatedMusicLabel);
+        File[] files = manager.getFileFromCurrentMonth(entityInstance);
+        if (files != null) {
+            updatedMusicLabel.setId(id);
+            musicLabels.put(id, updatedMusicLabel);
+            musicLabelWriter.update(id, updatedMusicLabel, files);
+        }
         return updatedMusicLabel;
     }
 

@@ -3,12 +3,14 @@ package ua.lviv.iot.spring.first.rest.service.impl;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import ua.lviv.iot.spring.first.rest.managers.FileManager;
 import ua.lviv.iot.spring.first.rest.models.Album;
 import ua.lviv.iot.spring.first.rest.models.Song;
 import ua.lviv.iot.spring.first.rest.service.AlbumService;
 import ua.lviv.iot.spring.first.rest.service.SongService;
 import ua.lviv.iot.spring.first.rest.writer.AlbumWriter;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,26 +20,29 @@ import java.util.Map;
 @Service
 @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class AlbumServiceImpl implements AlbumService {
-    private final Map<Integer, Album> albums;
-    private int nextAvailableId = 1;
+    private final Album entityInstance = new Album();
+
     private final AlbumWriter albumWriter;
+    private final FileManager manager = new FileManager();
+    private final Map<Integer, Album> albums;
+    private Integer nextAvailableId;
     private final SongService songService;
 
     public AlbumServiceImpl(final AlbumWriter albumWriter, final SongService songService) throws IOException {
         this.albumWriter = albumWriter;
-        this.albums = albumWriter.read();
+        this.albums = albumWriter.read(new File(manager.getMonthDirectoryPath(entityInstance)));
         this.songService = songService;
-        int maxId = albums.keySet().stream()
+        this.nextAvailableId = albums.keySet().stream()
                 .max(Integer::compareTo)
-                .orElse(0);
-        this.nextAvailableId = maxId + 1;
+                .orElse(0) + 1;
     }
 
     @Override
     public Album create(final Album album) throws IOException {
+        String fileName = manager.getFilePath(album);
         album.setId(nextAvailableId++);
         albums.put(album.getId(), album);
-        albumWriter.save(album);
+        albumWriter.save(album, fileName);
         return album;
     }
 
@@ -53,15 +58,21 @@ public class AlbumServiceImpl implements AlbumService {
 
     @Override
     public Album delete(final Integer id) throws IOException {
-        albumWriter.delete(id);
+        File[] files = manager.getFileFromCurrentMonth(entityInstance);
+        if (files != null) {
+            albumWriter.delete(id, files);
+        }
         return albums.remove(id);
     }
 
     @Override
     public Album update(final Integer id, final Album updatedAlbum) throws IOException {
-        updatedAlbum.setId(id);
-        albums.put(id, updatedAlbum);
-        albumWriter.update(id, updatedAlbum);
+        File[] files = manager.getFileFromCurrentMonth(entityInstance);
+        if (files != null) {
+            updatedAlbum.setId(id);
+            albums.put(id, updatedAlbum);
+            albumWriter.update(id, updatedAlbum, files);
+        }
         return updatedAlbum;
     }
 

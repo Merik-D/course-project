@@ -1,12 +1,13 @@
 package ua.lviv.iot.spring.first.rest.service.impl;
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import ua.lviv.iot.spring.first.rest.managers.FileManager;
 import ua.lviv.iot.spring.first.rest.models.Song;
 import ua.lviv.iot.spring.first.rest.service.SongService;
 import ua.lviv.iot.spring.first.rest.writer.SongWriter;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
@@ -14,24 +15,26 @@ import java.util.Map;
 @Service
 @Scope("singleton")
 public class SongServiceImpl implements SongService {
-    private final Map<Integer, Song> songs;
-    private int nextAvailableId = 1;
+    private final Song entityInstance = new Song();
     private final SongWriter songWriter;
+    private final FileManager manager = new FileManager();
+    private final Map<Integer, Song> songs;
+    private Integer nextAvailableId;
 
     public SongServiceImpl(final SongWriter songWriter) throws IOException {
         this.songWriter = songWriter;
-        this.songs = songWriter.read();
-        int maxId = songs.keySet().stream()
+        this.songs = songWriter.read(new File(manager.getMonthDirectoryPath(entityInstance)));
+        this.nextAvailableId = songs.keySet().stream()
                 .max(Integer::compareTo)
-                .orElse(0);
-        this.nextAvailableId = maxId + 1;
+                .orElse(0) + 1;
     }
 
     @Override
     public Song create(final Song song) throws IOException {
+        String fileName = manager.getFilePath(song);
         song.setId(nextAvailableId++);
         songs.put(song.getId(), song);
-        songWriter.save(song);
+        songWriter.save(song, fileName);
         return song;
     }
 
@@ -47,15 +50,22 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public Song delete(final Integer id) throws IOException {
-        songWriter.delete(id);
+        File[] files = manager.getFileFromCurrentMonth(entityInstance);
+        if (files != null) {
+            songWriter.delete(id, files);
+        }
         return songs.remove(id);
     }
 
     @Override
     public Song update(final Integer id, final Song updatedSong) throws IOException {
-        updatedSong.setId(id);
-        songs.put(id, updatedSong);
-        songWriter.update(id, updatedSong);
+        File[] files = manager.getFileFromCurrentMonth(entityInstance);
+        if (files != null) {
+            updatedSong.setId(id);
+            songs.put(id, updatedSong);
+            songWriter.update(id, updatedSong, files);
+        }
+
         return updatedSong;
     }
 

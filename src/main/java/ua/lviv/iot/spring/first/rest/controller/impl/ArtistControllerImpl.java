@@ -81,7 +81,7 @@ public class ArtistControllerImpl implements ArtistController {
 
     @Override
     @GetMapping("/{id}/albums")
-    public ResponseEntity<List<Album>> getArtistAlbum(@PathVariable final Integer id) throws IOException {
+    public ResponseEntity<List<Album>> getArtistAlbum(@PathVariable final Integer id) {
         List<Album> albums = artistService.getAllAlbumsByArtist(id);
         if (albums == null || albums.isEmpty()) {
             return ResponseEntity.notFound().build();

@@ -21,31 +21,23 @@ import java.util.Map;
 
 @Setter
 @Component
-public class ArtistWriter extends CustomFileWriter<Artist> {
-    private static final String FILE_PREFIX = "artist-";
-
-    private String fileDirectory = "src/main/resources/artist";
-    private List<File> files = findInputFiles(FILE_PREFIX, fileDirectory);
-
-    public ArtistWriter() {
-        super(FILE_PREFIX);
-        this.files = files;
-        createDirectoryIfNotExists(fileDirectory);
-        this.setFileName(generateFileName());
-    }
-
-    public ArtistWriter(String fileName, List<File> files) {
-        super("");
-        this.setFileName(fileName);
-        this.files = files;
-    }
+public class ArtistWriter implements TemplateFileWriter<Artist, Integer> {
 
     @Override
-    public void save(final Artist artist) throws IOException {
-        String filePath = fileDirectory + "/" + getFileName();
+    public void save(final Artist artist, final String pathToFiles) throws IOException {
+        File file = new File(pathToFiles);
+        File parentDir = file.getParentFile();
+
+        if (!parentDir.exists()) {
+            boolean dirCreated = parentDir.mkdirs();
+            if (!dirCreated) {
+                System.err.println("Failed to create parent directories for file: " + pathToFiles);
+                return;
+            }
+        }
+
         try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(
-                new FileOutputStream(filePath, true), StandardCharsets.UTF_8))) {
-            File file = new File(filePath);
+                new FileOutputStream(pathToFiles, true), StandardCharsets.UTF_8))) {
             boolean fileExists = file.exists();
 
             if (!fileExists || file.length() == 0) {
@@ -53,53 +45,59 @@ public class ArtistWriter extends CustomFileWriter<Artist> {
             }
 
             writer.println(artist.toCSV());
+
             System.out.println("Artist saved successfully.");
         }
     }
 
     @Override
-    public void delete(final Integer id) throws IOException {
-        for (File file : files) {
-            List<String> lines = new ArrayList<>();
+    public void delete(final Integer id, final File[] files) throws IOException {
+        if (files != null) {
+            for (File file : files) {
+                List<String> lines = new ArrayList<>();
 
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(file), StandardCharsets.UTF_8))) {
-                String headerLine = reader.readLine();
-                lines.add(headerLine);
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(file), StandardCharsets.UTF_8))) {
+                    String headerLine = reader.readLine();
+                    lines.add(headerLine);
 
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    Artist currentArtist = extractFromCSV(line);
-                    if (currentArtist.getId().equals(id)) {
-                        continue;
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        Artist currentArtist = extractFromCSV(line);
+                        if (currentArtist.getId().equals(id)) {
+                            continue;
+                        }
+                        lines.add(line);
                     }
-                    lines.add(line);
                 }
-            }
 
-            try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(
-                    new FileOutputStream(file), StandardCharsets.UTF_8))) {
-                for (String updatedLine : lines) {
-                    writer.println(updatedLine);
+                try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(
+                        new FileOutputStream(file), StandardCharsets.UTF_8))) {
+                    for (String updatedLine : lines) {
+                        writer.println(updatedLine);
+                    }
                 }
             }
         }
     }
 
     @Override
-    public Map<Integer, Artist> read() throws IOException {
+    public Map<Integer, Artist> read(final File monthDirectory) throws IOException {
         Map<Integer, Artist> artists = new HashMap<>();
+        File[] files = monthDirectory.listFiles();
 
-        for (File file : files) {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(file), StandardCharsets.UTF_8))) {
+        if (files != null) {
+            for (File file : files) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(file), StandardCharsets.UTF_8))) {
 
-                reader.readLine();
+                    reader.readLine();
 
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    Artist artist = extractFromCSV(line);
-                    artists.put(artist.getId(), artist);
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        Artist artist = extractFromCSV(line);
+                        artists.put(artist.getId(), artist);
+                    }
                 }
             }
         }
@@ -107,50 +105,34 @@ public class ArtistWriter extends CustomFileWriter<Artist> {
     }
 
     @Override
-    public void update(final Integer id, final Artist updatedArtist) throws IOException {
-        boolean updated = false;
+    public void update(final Integer id, final Artist updatedArtist, final File[] files) throws IOException {
+        if (files != null) {
+            for (File file : files) {
+                List<String> updatedLines = new ArrayList<>();
 
-        for (File file : files) {
-            List<String> updatedLines = new ArrayList<>();
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(file), StandardCharsets.UTF_8))) {
+                    String headerLine = reader.readLine();
+                    updatedLines.add(headerLine);
 
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(file), StandardCharsets.UTF_8))) {
-                String headerLine = reader.readLine();
-                updatedLines.add(headerLine);
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        Artist currentArtist = extractFromCSV(line);
+                        if (currentArtist.getId().equals(id)) {
+                            updatedLines.add(updatedArtist.toCSV());
+                        } else {
+                            updatedLines.add(line);
+                        }
+                    }
+                }
 
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    Artist currentArtist = extractFromCSV(line);
-                    if (currentArtist.getId().equals(id)) {
-                        updatedLines.add(updatedArtist.toCSV());
-                        updated = true;
-                    } else {
-                        updatedLines.add(line);
+                try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(
+                        new FileOutputStream(file), StandardCharsets.UTF_8))) {
+                    for (String updatedLine : updatedLines) {
+                        writer.println(updatedLine);
                     }
                 }
             }
-
-            try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(
-                    new FileOutputStream(file), StandardCharsets.UTF_8))) {
-                for (String updatedLine : updatedLines) {
-                    writer.println(updatedLine);
-                }
-            }
-
-            if (updated) {
-                System.out.println("Artist updated successfully in file: " + file.getName());
-                break;
-            }
-        }
-    }
-
-    public String getArtistNameById(final Integer id) throws IOException {
-        Artist artist = read().get(id);
-
-        if (artist != null) {
-            return artist.getName();
-        } else {
-            return null;
         }
     }
 
@@ -170,8 +152,6 @@ public class ArtistWriter extends CustomFileWriter<Artist> {
         }
         return new Artist(id, name, dateOfBirth, albumsId);
     }
-
-
 
 
 }

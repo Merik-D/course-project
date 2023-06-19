@@ -1,9 +1,6 @@
 package ua.lviv.iot.spring.first.rest.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -19,7 +16,7 @@ public class Album {
     private Integer id;
     private String title;
     private String genre;
-    private int releaseYear;
+    private Integer releaseYear;
     private List<Integer> songsId = new ArrayList<>();
 
 

@@ -2,12 +2,14 @@ package ua.lviv.iot.spring.first.rest.service.impl;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import ua.lviv.iot.spring.first.rest.managers.FileManager;
 import ua.lviv.iot.spring.first.rest.models.Album;
 import ua.lviv.iot.spring.first.rest.models.Artist;
 import ua.lviv.iot.spring.first.rest.service.AlbumService;
 import ua.lviv.iot.spring.first.rest.service.ArtistService;
 import ua.lviv.iot.spring.first.rest.writer.ArtistWriter;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,27 +20,28 @@ import java.util.Map;
 @Scope("singleton")
 public class ArtistServiceImpl implements ArtistService {
 
+    private final Artist entityInstance = new Artist();
     private final Map<Integer, Artist> artists;
-    private int nextAvailableId = 1;
-
     private final ArtistWriter artistWriter;
+    private final FileManager manager = new FileManager();
+    private Integer nextAvailableId;
     private final AlbumService albumService;
 
     public ArtistServiceImpl(final ArtistWriter artistWriter, final AlbumService albumService) throws IOException {
         this.artistWriter = artistWriter;
-        this.artists = artistWriter.read();
+        this.artists = artistWriter.read(new File(manager.getMonthDirectoryPath(entityInstance)));
         this.albumService = albumService;
-        int maxId = artists.keySet().stream()
+        this.nextAvailableId = artists.keySet().stream()
                 .max(Integer::compareTo)
-                .orElse(0);
-        this.nextAvailableId = maxId + 1;
+                .orElse(0) + 1;
     }
 
     @Override
     public Artist create(final Artist artist) throws IOException {
-        artist.setId((Integer) nextAvailableId++);
+        String fileName = manager.getFilePath(artist);
+        artist.setId(nextAvailableId++);
         artists.put(artist.getId(), artist);
-        artistWriter.save(artist);
+        artistWriter.save(artist, fileName);
         return artist;
     }
 
@@ -54,15 +57,21 @@ public class ArtistServiceImpl implements ArtistService {
 
     @Override
     public Artist delete(final Integer id) throws IOException {
-        artistWriter.delete(id);
+        File[] files = manager.getFileFromCurrentMonth(entityInstance);
+        if (files != null) {
+            artistWriter.delete(id, files);
+        }
         return artists.remove(id);
     }
 
     @Override
     public Artist update(final Integer id, final Artist updatedArtist) throws IOException {
-        updatedArtist.setId(id);
-        artists.put(id, updatedArtist);
-        artistWriter.update(id, updatedArtist);
+        File[] files = manager.getFileFromCurrentMonth(entityInstance);
+        if (files != null) {
+            updatedArtist.setId(id);
+            artists.put(id, updatedArtist);
+            artistWriter.update(id, updatedArtist, files);
+        }
         return updatedArtist;
     }
 
