@@ -52,6 +52,7 @@ public class ArtistControllerImpl implements ArtistController {
         }
     }
 
+    @Override
     @PostMapping
     public ResponseEntity<Artist> create(@RequestBody final Artist artist) throws IOException {
         Artist addedArtist = artistService.create(artist);
