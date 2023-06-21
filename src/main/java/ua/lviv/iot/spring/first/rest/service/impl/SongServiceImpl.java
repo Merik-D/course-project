@@ -1,6 +1,5 @@
 package ua.lviv.iot.spring.first.rest.service.impl;
 
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import ua.lviv.iot.spring.first.rest.managers.FileManager;
 import ua.lviv.iot.spring.first.rest.models.Song;
@@ -9,11 +8,12 @@ import ua.lviv.iot.spring.first.rest.writer.SongWriter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 @Service
-@Scope("singleton")
 public class SongServiceImpl implements SongService {
     private final Song entityInstance = new Song();
     private final SongWriter songWriter;
@@ -77,5 +77,16 @@ public class SongServiceImpl implements SongService {
         } else {
             return null;
         }
+    }
+
+    public List<Song> getSongsByIds(List<Integer> songIds) {
+        List<Song> songs = new ArrayList<>();
+        for (Integer songId : songIds) {
+            Song song = getById(songId);
+            if (song != null) {
+                songs.add(song);
+            }
+        }
+        return songs;
     }
 }

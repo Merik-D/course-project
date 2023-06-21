@@ -1,7 +1,5 @@
 package ua.lviv.iot.spring.first.rest.service.impl;
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import ua.lviv.iot.spring.first.rest.managers.FileManager;
 import ua.lviv.iot.spring.first.rest.models.Artist;
@@ -18,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class MusicLabelServiceImpl implements MusicLabelService {
     private final MusicLabel entityInstance = new MusicLabel();
     private final Map<Integer, MusicLabel> musicLabels;

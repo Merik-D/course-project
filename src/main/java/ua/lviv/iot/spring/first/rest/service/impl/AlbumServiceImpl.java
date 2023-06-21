@@ -1,7 +1,5 @@
 package ua.lviv.iot.spring.first.rest.service.impl;
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import ua.lviv.iot.spring.first.rest.managers.FileManager;
 import ua.lviv.iot.spring.first.rest.models.Album;
@@ -12,13 +10,11 @@ import ua.lviv.iot.spring.first.rest.writer.AlbumWriter;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 @Service
-@Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class AlbumServiceImpl implements AlbumService {
     private final Album entityInstance = new Album();
 
@@ -80,19 +76,11 @@ public class AlbumServiceImpl implements AlbumService {
         Album album = albums.get(albumId);
         if (album != null) {
             List<Integer> songsId = album.getSongsId();
-            List<Song> songsInAlbum = new ArrayList<>();
-
-            for (Integer songId : songsId) {
-                Song song = songService.getById(songId);
-                if (song != null) {
-                    songsInAlbum.add(song);
-                }
+            if (!songsId.isEmpty()) {
+                return songService.getSongsByIds(songsId);
             }
-
-            return songsInAlbum;
-        } else {
-            return null;
         }
+        return null;
     }
 
     @Override

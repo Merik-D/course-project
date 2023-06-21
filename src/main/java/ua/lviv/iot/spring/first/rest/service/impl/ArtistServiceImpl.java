@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@Scope("singleton")
 public class ArtistServiceImpl implements ArtistService {
 
     private final Artist entityInstance = new Artist();
