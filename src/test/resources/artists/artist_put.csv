@@ -1,0 +1,2 @@
+id, name, dateOfBirth, albumsId
+1, NewName1, 2023-06-10, [3, 4]

@@ -1,0 +1,2 @@
+id, title, genre, releaseYear, songsId
+1, NewAlbum, NewSomeGenre, 2002, [3, 4]
