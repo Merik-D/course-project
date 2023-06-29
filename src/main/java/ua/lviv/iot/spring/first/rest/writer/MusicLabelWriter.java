@@ -11,7 +11,7 @@ import java.util.List;
 public class MusicLabelWriter extends TemplateFileWriter<MusicLabel, Integer> {
 
     @Override
-    protected String getHeaders(MusicLabel entity) {
+    protected String getHeaders(final MusicLabel entity) {
         return entity.getHeaders();
     }
 
@@ -33,12 +33,12 @@ public class MusicLabelWriter extends TemplateFileWriter<MusicLabel, Integer> {
     }
 
     @Override
-    protected String convertToCSV(MusicLabel entity) {
+    protected String convertToCSV(final MusicLabel entity) {
         return entity.toCSV();
     }
 
     @Override
-    protected Integer getIdFromEntity(MusicLabel entity) {
+    protected Integer getIdFromEntity(final MusicLabel entity) {
         return entity.getId();
     }
 }

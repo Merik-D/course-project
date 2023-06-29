@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class AlbumWriter extends TemplateFileWriter<Album, Integer> {
 
     @Override
-    protected String getHeaders(Album entity) {
+    protected String getHeaders(final Album entity) {
         return entity.getHeaders();
     }
 
@@ -32,12 +32,12 @@ public class AlbumWriter extends TemplateFileWriter<Album, Integer> {
     }
 
     @Override
-    protected String convertToCSV(Album entity) {
+    protected String convertToCSV(final Album entity) {
         return entity.toCSV();
     }
 
     @Override
-    protected Integer getIdFromEntity(Album entity) {
+    protected Integer getIdFromEntity(final Album entity) {
         return entity.getId();
     }
 }

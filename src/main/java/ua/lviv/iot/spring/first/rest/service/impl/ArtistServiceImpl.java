@@ -1,6 +1,5 @@
 package ua.lviv.iot.spring.first.rest.service.impl;
 
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import ua.lviv.iot.spring.first.rest.managers.FileManager;
 import ua.lviv.iot.spring.first.rest.models.Album;

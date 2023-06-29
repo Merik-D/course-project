@@ -1,5 +1,6 @@
 package ua.lviv.iot.spring.first.rest.service.impl;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import ua.lviv.iot.spring.first.rest.managers.FileManager;
 import ua.lviv.iot.spring.first.rest.models.Album;
@@ -11,10 +12,12 @@ import ua.lviv.iot.spring.first.rest.writer.AlbumWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
+@Configuration
 public class AlbumServiceImpl implements AlbumService {
     private final Album entityInstance = new Album();
 
@@ -23,6 +26,7 @@ public class AlbumServiceImpl implements AlbumService {
     private final Map<Integer, Album> albums;
     private Integer nextAvailableId;
     private final SongService songService;
+    private final Map<Integer, List<Song>> albumSongs = new HashMap<>();
 
     public AlbumServiceImpl(final AlbumWriter albumWriter, final SongService songService) throws IOException {
         this.albumWriter = albumWriter;
@@ -75,10 +79,13 @@ public class AlbumServiceImpl implements AlbumService {
     public List<Song> getAllSongsInAlbum(final Integer albumId) {
         Album album = albums.get(albumId);
         if (album != null) {
-            List<Integer> songsId = album.getSongsId();
-            if (!songsId.isEmpty()) {
-                return songService.getSongsByIds(songsId);
+            List<Song> songsInAlbum = albumSongs.get(albumId);
+            if (songsInAlbum == null) {
+                List<Integer> songsId = album.getSongsId();
+                songsInAlbum = songService.getSongsByIds(songsId);
+                albumSongs.put(albumId, songsInAlbum);
             }
+            return songsInAlbum;
         }
         return null;
     }

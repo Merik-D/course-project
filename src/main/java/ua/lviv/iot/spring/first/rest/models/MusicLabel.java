@@ -8,7 +8,6 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -29,18 +28,6 @@ public class MusicLabel {
 
     public String toCSV() {
         return id + ", " + title + ", " + dateOfEstablishment + ", " + artistsId;
-    }
-
-    public List<Integer> getArtistsId() {
-        return Collections.unmodifiableList(artistsId);
-    }
-
-    public void setArtistsId(final List<Integer> artistsId) {
-        if (artistsId != null) {
-            this.artistsId = new ArrayList<>(artistsId);
-        } else {
-            this.artistsId = new ArrayList<>();
-        }
     }
 
 }

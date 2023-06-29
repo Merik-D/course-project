@@ -79,7 +79,7 @@ public class SongServiceImpl implements SongService {
         }
     }
 
-    public List<Song> getSongsByIds(List<Integer> songIds) {
+    public List<Song> getSongsByIds(final List<Integer> songIds) {
         List<Song> songs = new ArrayList<>();
         for (Integer songId : songIds) {
             Song song = getById(songId);

@@ -11,7 +11,7 @@ import java.util.List;
 public class ArtistWriter extends TemplateFileWriter<Artist, Integer> {
 
     @Override
-    protected String getHeaders(Artist entity) {
+    protected String getHeaders(final Artist entity) {
         return entity.getHeaders();
     }
 
@@ -34,12 +34,12 @@ public class ArtistWriter extends TemplateFileWriter<Artist, Integer> {
     }
 
     @Override
-    protected String convertToCSV(Artist entity) {
+    protected String convertToCSV(final Artist entity) {
         return entity.toCSV();
     }
 
     @Override
-    protected Integer getIdFromEntity(Artist entity) {
+    protected Integer getIdFromEntity(final Artist entity) {
         return entity.getId();
     }
 }

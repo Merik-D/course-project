@@ -16,7 +16,7 @@ import java.util.Map;
 
 public abstract class TemplateFileWriter<T, ID> {
 
-    public void save(T entity, String pathToFiles) throws IOException{
+    public void save(final T entity, final String pathToFiles) throws IOException {
         File file = new File(pathToFiles);
         File parentDir = file.getParentFile();
 
@@ -40,7 +40,7 @@ public abstract class TemplateFileWriter<T, ID> {
         }
     };
 
-    public void delete(ID id, File[] files) throws IOException{
+    public void delete(final ID id, final File[] files) throws IOException {
         if (files != null) {
             for (File file : files) {
                 List<String> lines = new ArrayList<>();
@@ -70,7 +70,7 @@ public abstract class TemplateFileWriter<T, ID> {
         }
     };
 
-    public void update(ID id, T entity, File[] files) throws IOException{
+    public void update(final ID id, final T entity, final File[] files) throws IOException {
         if (files != null) {
             for (File file : files) {
                 List<String> updatedLines = new ArrayList<>();
@@ -101,7 +101,7 @@ public abstract class TemplateFileWriter<T, ID> {
         }
     };
 
-    public Map<ID, T> read(File monthDirectory) throws IOException{
+    public Map<ID, T> read(final File monthDirectory) throws IOException {
         Map<ID, T> entities = new HashMap<>();
         File[] files = monthDirectory.listFiles();
 

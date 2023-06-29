@@ -1,8 +1,10 @@
 package ua.lviv.iot.spring.first.rest.models;
 
-import lombok.*;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,14 +29,6 @@ public class Album {
 
     public String toCSV() {
         return id + ", " + title + ", " + genre + ", " + releaseYear + ", " + songsId;
-    }
-
-    public List<Integer> getSongsId() {
-        return new ArrayList<>(songsId);
-    }
-
-    public void setSongsId(final List<Integer> songsId) {
-        this.songsId = new ArrayList<>(songsId);
     }
 
 }
